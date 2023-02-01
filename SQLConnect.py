@@ -66,6 +66,24 @@ def connect_and_query(queries, types, database="test"):
     return ret
 
 
+def insert_query_dict(table_name, fields):
+    columns = "("
+    entries = "("
+    for key, val in fields.items():
+        columns += key + ', '
+        if isinstance(val, str):
+            if '"' in val:
+                entries += "'" + val + "', "
+            else:
+                entries += '"' + val + '", '
+        elif val is not None:
+            entries += str(val) + ", "
+        else:
+            entries += "NULL, "
+    entries = entries[:-2] + ')'
+    columns = columns[:-2] + ')'
+    return "INSERT INTO " + table_name + " " + columns + " VALUES " + entries + ";"
+
 
 def insert_query(table_name, column_names, entry_types, entry):
     """

@@ -2,21 +2,17 @@ from selenium import webdriver
 import requests
 import json
 from requests.exceptions import Timeout
-
-# get patent URLs
 with open("final_patent_urls.json") as json_file:
     data = json.load(json_file)
-
 names = list(data.keys())
+#urls = ["https://reporter.nih.gov/search/AHX93Q_1aEqW22nz2cP8EA/patents"]
 store = {}
 count = 0
+#names = ["Abboud, Francois"]
 failed = []
-print(len(names))
-# Get patent info per names
 for name in names:
     count +=1
-    if count % 100 == 0:
-        print(str(count) + "/" + str(len(names)))
+    print(count)
     if count % 50 == 0:
         with open('first_patent_data.json', 'w') as fp:
             json.dump(store, fp)
@@ -39,6 +35,7 @@ for name in names:
                 final.append(temp)
             store[name]["first"] = final
             if "marked" in key:
+                store[name]['marked'] = {}
                 ids = dic["marked"].keys()
                 for id in ids:
                     url = dic["marked"][id]
@@ -54,11 +51,27 @@ for name in names:
         except:
             failed.append(name)
             print("failed")
-
-
-# Store in JSON
 with open('first_patent_data.json', 'w') as fp:
     json.dump(store, fp)
+print(store)
 with open('patent_failed_data.txt', 'w') as f:
     for line in failed:
         f.write(f"{line}\n")
+
+
+#wd.execute_script("return localStorage.getItem('foo')")
+#with open('nih_data.json') as json_file:
+#    data = json.load(json_file)
+#print(data["Aagaard, Kjersti M."])
+#names = list(data.keys())
+#for name in names:
+#    projects = data[name]
+#    for project in projects:
+#        num = project["core_project_num"]
+
+
+
+#urls = []
+#for blank in project_url:
+#   blank += "/patents"
+#   urls.append(blank)

@@ -3,20 +3,18 @@ import requests
 import json
 from requests.exceptions import Timeout
 
-# Get URLs
 with open("final_patent_urls.json") as json_file:
     data = json.load(json_file)
 file1 = open('patent_failed_data.txt', 'r')
 
-# Get names
 names = []
+# Using for loop
 for line in file1:
      names.append(line.strip())
 
 store = {}
 count = 0
 failed = []
-# Get patent data for each name
 for name in names:
     count +=1
     print(count)
@@ -58,10 +56,6 @@ for name in names:
         except:
             failed.append(name)
             print("failed")
-
-
-
-# Store in JSON
 with open('second_patent_data.json', 'w') as fp:
     json.dump(store, fp)
 with open('second_patent_failed_data.txt', 'w') as f:
