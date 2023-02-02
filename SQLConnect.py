@@ -10,8 +10,8 @@ def connect_and_query(queries, types, database="test"):
           DB
         - types (list of str): The types of queries we are making
     Output:
-        When type == "SELECT", we return the selected rows, otherwise
-        we do not return anything.
+        When the type corresponding to a query is 'SELECT', the query
+        outputs will be returned
     Detail:
     queries and types must have the same lengths
     """
@@ -67,6 +67,16 @@ def connect_and_query(queries, types, database="test"):
 
 
 def insert_query_dict(table_name, fields):
+    """
+    Inputs:
+        - table_name (str): Name of the table
+        - fields (dict): a mapping from column names to the values to
+                        be inserted
+    Outputs:
+        return insert query
+    Details:
+        This function helps create an INSERT query given a dictionary
+    """
     columns = "("
     entries = "("
     for key, val in fields.items():
@@ -97,10 +107,9 @@ def insert_query(table_name, column_names, entry_types, entry):
     Outputs:
         return insert query
     Details:
-        This function inserts into the table specified by table_name
-        a new entry specified by entry. This function expects that
-        all of column_names, entry_names, and entry to have the same
-        length.
+        This function helps create an INSERT query given a table name,
+        the name of the columns, the type of the column entries, and
+        the column entries themselves
     """
     # Clean entry to make insert query
     modded_entry = "("
