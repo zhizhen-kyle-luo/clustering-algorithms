@@ -1,0 +1,94 @@
+import openalexapi
+import requests, json
+
+#find ORCID id for scientists below:
+test_name_list = [
+    "william pao",
+    "frederick suchy",
+    "malcolm cox",
+    "nancy cooke",
+    "allan sniderman",
+    "vincent dennis",
+    "alessandra pernis",
+    "john minna",
+    "dennis bier",
+    "roger pomerantz"
+] #names from asci/aap data
+
+base_url = 'https://api.openalex.org/'
+def set_query_call_name(endpoint, filterInfo, name):
+    fullquery = base_url+endpoint+'?'+filterInfo+name
+    response = requests.get(fullquery)
+    visualize_data = response.json()
+    return visualize_data
+    #print(json.dumps(visualize_data, indent=2)
+
+def get_authorIDs(name):
+    listofIDs = []
+    outDict = set_query_call_name('authors', 'search=', name)
+    ids = outDict['results']
+    for i in ids:
+        tempList = i['id'].split("/")
+        listofIDs.append(tempList[3])
+    return listofIDs
+
+#get_authorIDs("William Pao")
+
+def work_id(givenAuthorID):
+        page = 'page={}'
+        filtered_works_url = f'https://api.openalex.org/works?filter=author.id:{givenAuthorID}&{page}'
+        page = 1
+        has_more_pages = True
+        fewer_than_50_results = True
+        all_worksID = []
+
+        # loop through pages
+        while has_more_pages and fewer_than_50_results:
+
+            # set page value and request page from OpenAlex
+            url = filtered_works_url.format(page)
+            page_with_results = requests.get(url).json()
+
+            # loop through partial list of results
+            results = page_with_results['results']
+            for i,work in enumerate(results):
+                openalex_id = work['id'].replace("https://openalex.org/", "")
+                all_worksID.append(openalex_id)
+            # next page
+            page += 1
+
+            # end loop when either there are no more results on the requested page 
+            # or the next request would exceed 15 results
+            per_page = page_with_results['meta']['per_page']
+            has_more_pages = len(results) == per_page
+            fewer_than_50_results = per_page * page <= 50
+        return (all_worksID)
+#work_id('A4299270060')
+
+def findWork(workId):
+    fullquery = base_url+'works/'+workId
+    response = requests.get(fullquery)
+    visualize_data = response.json()
+    visualize_data.pop("abstract_inverted_index")
+    visualize_data.pop("related_works")
+    visualize_data.pop("ngrams_url")
+    #clean the unicode
+    #visualize_data[""]
+    return visualize_data
+#findWork('W4298087161')
+#dont need abstract_inverted_index,related_works data
+
+tempDict = {}
+personDict = {}
+with open('OpenAlex_Output.json', 'w', encoding="utf-8") as jsonFile:
+    for name in test_name_list:
+        print("Working to find works by: "+name)
+        for authorID in get_authorIDs(name):
+            #print(f'authorID: ' + authorID)
+            for workID in work_id(authorID):
+                tempDict[workID]=(findWork(workID))
+        personDict[name] = tempDict
+        json_object = json.dumps(personDict, ensure_ascii=False, indent=4)
+        jsonFile.write(json_object)
+        tempDict.clear()
+        personDict.clear()
