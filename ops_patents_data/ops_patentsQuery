@@ -6,6 +6,7 @@ from time import sleep
 from IPython.display import clear_output
 import hardcoded
 
+
 def convert_to_b64(x):
     '''dealing with the consumer key'''
     return str(b64encode(x.encode("ascii")))[2:-1]
@@ -232,127 +233,137 @@ def search_patent_via_post(patents_list, token=get_new_token()):
 
 
 
+def clean_data_query(outputDict):
+    #print(f'Response---------------------------------{response}')
+    #try:
+        #doc_id = response["bibliographic-data"]["application-reference"]["@doc-id"]
+    #except TypeError:
+        #print("----------------BIBLIOGRAPHIC DATA----------------")
+    #print(outputDict)
+    patent_data_dict = {
+        # basic info about patent, application date code may need to be changed
+        "doc_id": outputDict["bibliographic-data"]["application-reference"]["@doc-id"], #PROBLEM ARISING HERE
+        "family_id": outputDict["@family-id"]
+    }
+    # COUNTRY   
+    patent_data_dict["country"] = outputDict["bibliographic-data"]["application-reference"]["document-id"][0]["country"]["$"]
+
+    # DATE
+    if "date" in outputDict["bibliographic-data"]["application-reference"]["document-id"][1].keys():
+        # has date
+        patent_data_dict["application_date"] = outputDict[
+            "bibliographic-data"]["application-reference"]["document-id"][1]["date"]["$"]
+        # patent_data_dict["application_date"] = pd.to_datetime(response[
+        #     "bibliographic-data"]["application-reference"]["document-id"][1]["date"]["$"])
+    else:
+        # doesn't have date
+        patent_data_dict["application_date"] = None
+
+    # APPLICANT
+    if "applicants" in outputDict["bibliographic-data"]["parties"].keys():
+        # if applicant section is listed
+        if type(outputDict["bibliographic-data"]["parties"]["applicants"]["applicant"]) == list:
+            # multiple applicants
+            patent_data_dict["applicants_list_original"] = [i["applicant-name"]["name"]["$"]
+                                                            # [
+                                                            # int(i["@sequence"]),  # applicant sequence
+                                                            # i["applicant-name"]["name"]]  # applicant name
+                                                            for i in outputDict["bibliographic-data"]["parties"]["applicants"]["applicant"] if i["@data-format"] == "original"]
+
+            patent_data_dict["applicants_list_epodoc"] = [i["applicant-name"]["name"]["$"]
+                                                            # [
+                                                            # int(i["@sequence"]),  # applicant sequence
+                                                            # i["applicant-name"]["name"]]  # applicant name
+                                                            for i in outputDict["bibliographic-data"]["parties"]["applicants"]["applicant"] if i["@data-format"] == "epodoc"]
+        else:
+            # one applicant
+            # assume if only one name, name is in original format
+            patent_data_dict["applicants_list_original"] = [outputDict["bibliographic-data"]
+                                                            ["parties"]["applicants"]["applicant"]["applicant-name"]["name"]["$"]]
+            patent_data_dict["applicants_list_epodoc"] = []
+    else:
+        patent_data_dict["applicants_list_original"] = []
+        patent_data_dict["applicants_list_epodoc"] = []
+
+    # INVENTOR
+    if "inventors" in outputDict["bibliographic-data"]["parties"].keys():
+        if "inventor" in outputDict["bibliographic-data"]["parties"]["inventors"].keys():
+            # has inventor(s)
+            if type(outputDict["bibliographic-data"]["parties"]["inventors"]["inventor"]) == list:
+                # if has multiple inventors
+                patent_data_dict["inventors_list_original"] = [i["inventor-name"]["name"]["$"]
+                                                                # [
+                                                                # int(i["@sequence"]),  # inventor sequence
+                                                                # i["inventor-name"]["name"]["$"]]  # name of inventor
+                                                                for i in outputDict["bibliographic-data"]["parties"]["inventors"]["inventor"] if i["@data-format"] == "original"]
+
+                patent_data_dict["inventors_list_epodoc"] = [i["inventor-name"]["name"]["$"]
+                                                                # [
+                                                                # int(i["@sequence"]),  # inventor sequence
+                                                                # i["inventor-name"]["name"]["$"]]  # name of inventor
+                                                                for i in outputDict["bibliographic-data"]["parties"]["inventors"]["inventor"] if i["@data-format"] == "epodoc"]
+            else:
+                # if only one investor is listed, assume that it's in original format
+                patent_data_dict["inventors_list_original"] = [
+                    outputDict["bibliographic-data"]["parties"]["inventors"]["inventor"]["inventor-name"]["name"]["$"]]
+                patent_data_dict["inventors_list_epodoc"] = []
+        else:
+            # weird error
+            # print(
+            #     "----------------------HAS INVENTORS BUT NOT INVENTOR----------------------")
+            # jprint(response)
+            raise Exception("------PROBLEM AROUND LINE 349------")
+    # no inventor listed
+    else:
+        patent_data_dict["inventors_list_original"] = []
+        patent_data_dict["inventors_list_epodoc"] = []
+
+    # TITLE
+    if "invention-title" not in outputDict["bibliographic-data"].keys():
+        # no title available
+        patent_data_dict["invention_titles"] = []
+    # multiple titles available
+    elif type(outputDict["bibliographic-data"]["invention-title"]) == list:
+        patent_data_dict["invention_titles"] = [
+            [i["$"],  # name
+                i["@lang"]]  # language
+            for i in outputDict["bibliographic-data"]["invention-title"]]
+    # one title
+    else:
+        patent_data_dict["invention_titles"] = [
+            [outputDict["bibliographic-data"]["invention-title"]["$"],  # name
+                outputDict["bibliographic-data"]["invention-title"]["@lang"]]]  # language
+
+    # ABSTRACT
+    if "abstract" not in outputDict.keys():
+        # no abstract available
+        patent_data_dict["abstracts"] = []
+    elif type(outputDict["abstract"]) == list:
+        # multiple abstracts
+        patent_data_dict["abstracts"] = [[i["p"]["$"],  # abstract
+                                            i["@lang"]]  # lang
+                                            for i in outputDict["abstract"]]
+    # one abstract
+    else:
+        patent_data_dict["abstracts"] = [outputDict["abstract"]["p"]["$"],  # abstract
+                                            outputDict["abstract"]["@lang"]]  # lang
+
+    #ans.append(patent_data_dict)
+    return patent_data_dict
+
+
 def get_data_from_patent_query(responses_list):
     '''pass in the response from search_patent() to get data about the patent'''
 
     ans = []
     for responses in responses_list:
-        #jprint(responses) #TRYING TO TROUBLESHOOT
-        for response in responses:
-            #try:
-                #doc_id = response["bibliographic-data"]["application-reference"]["@doc-id"]
-            #except TypeError:
-                #print("----------------BIBLIOGRAPHIC DATA----------------")
-                #jprint(response)
-            patent_data_dict = {
-                # basic info about patent, application date code may need to be changed
-                "doc_id": response["bibliographic-data"]["application-reference"]["@doc-id"], #PROBLEM ARISING HERE
-                "family_id": response["@family-id"]
-            }
-            # COUNTRY
-            patent_data_dict["country"] = response["bibliographic-data"]["application-reference"]["document-id"][0]["country"]["$"]
-
-            # DATE
-            if "date" in response["bibliographic-data"]["application-reference"]["document-id"][1].keys():
-                # has date
-                patent_data_dict["application_date"] = response[
-                    "bibliographic-data"]["application-reference"]["document-id"][1]["date"]["$"]
-                # patent_data_dict["application_date"] = pd.to_datetime(response[
-                #     "bibliographic-data"]["application-reference"]["document-id"][1]["date"]["$"])
-            else:
-                # doesn't have date
-                patent_data_dict["application_date"] = None
-
-            # APPLICANT
-            if "applicants" in response["bibliographic-data"]["parties"].keys():
-                # if applicant section is listed
-                if type(response["bibliographic-data"]["parties"]["applicants"]["applicant"]) == list:
-                    # multiple applicants
-                    patent_data_dict["applicants_list_original"] = [i["applicant-name"]["name"]["$"]
-                                                                    # [
-                                                                    # int(i["@sequence"]),  # applicant sequence
-                                                                    # i["applicant-name"]["name"]]  # applicant name
-                                                                    for i in response["bibliographic-data"]["parties"]["applicants"]["applicant"] if i["@data-format"] == "original"]
-
-                    patent_data_dict["applicants_list_epodoc"] = [i["applicant-name"]["name"]["$"]
-                                                                  # [
-                                                                  # int(i["@sequence"]),  # applicant sequence
-                                                                  # i["applicant-name"]["name"]]  # applicant name
-                                                                  for i in response["bibliographic-data"]["parties"]["applicants"]["applicant"] if i["@data-format"] == "epodoc"]
-                else:
-                    # one applicant
-                    # assume if only one name, name is in original format
-                    patent_data_dict["applicants_list_original"] = [response["bibliographic-data"]
-                                                                    ["parties"]["applicants"]["applicant"]["applicant-name"]["name"]["$"]]
-                    patent_data_dict["applicants_list_epodoc"] = []
-            else:
-                patent_data_dict["applicants_list_original"] = []
-                patent_data_dict["applicants_list_epodoc"] = []
-
-            # INVENTOR
-            if "inventors" in response["bibliographic-data"]["parties"].keys():
-                if "inventor" in response["bibliographic-data"]["parties"]["inventors"].keys():
-                    # has inventor(s)
-                    if type(response["bibliographic-data"]["parties"]["inventors"]["inventor"]) == list:
-                        # if has multiple inventors
-                        patent_data_dict["inventors_list_original"] = [i["inventor-name"]["name"]["$"]
-                                                                       # [
-                                                                       # int(i["@sequence"]),  # inventor sequence
-                                                                       # i["inventor-name"]["name"]["$"]]  # name of inventor
-                                                                       for i in response["bibliographic-data"]["parties"]["inventors"]["inventor"] if i["@data-format"] == "original"]
-
-                        patent_data_dict["inventors_list_epodoc"] = [i["inventor-name"]["name"]["$"]
-                                                                     # [
-                                                                     # int(i["@sequence"]),  # inventor sequence
-                                                                     # i["inventor-name"]["name"]["$"]]  # name of inventor
-                                                                     for i in response["bibliographic-data"]["parties"]["inventors"]["inventor"] if i["@data-format"] == "epodoc"]
-                    else:
-                        # if only one investor is listed, assume that it's in original format
-                        patent_data_dict["inventors_list_original"] = [
-                            response["bibliographic-data"]["parties"]["inventors"]["inventor"]["inventor-name"]["name"]["$"]]
-                        patent_data_dict["inventors_list_epodoc"] = []
-                else:
-                    # weird error
-                    # print(
-                    #     "----------------------HAS INVENTORS BUT NOT INVENTOR----------------------")
-                    # jprint(response)
-                    raise Exception("------PROBLEM AROUND LINE 349------")
-            # no inventor listed
-            else:
-                patent_data_dict["inventors_list_original"] = []
-                patent_data_dict["inventors_list_epodoc"] = []
-
-            # TITLE
-            if "invention-title" not in response["bibliographic-data"].keys():
-                # no title available
-                patent_data_dict["invention_titles"] = []
-            # multiple titles available
-            elif type(response["bibliographic-data"]["invention-title"]) == list:
-                patent_data_dict["invention_titles"] = [
-                    [i["$"],  # name
-                     i["@lang"]]  # language
-                    for i in response["bibliographic-data"]["invention-title"]]
-            # one title
-            else:
-                patent_data_dict["invention_titles"] = [
-                    [response["bibliographic-data"]["invention-title"]["$"],  # name
-                     response["bibliographic-data"]["invention-title"]["@lang"]]]  # language
-
-            # ABSTRACT
-            if "abstract" not in response.keys():
-                # no abstract available
-                patent_data_dict["abstracts"] = []
-            elif type(response["abstract"]) == list:
-                # multiple abstracts
-                patent_data_dict["abstracts"] = [[i["p"]["$"],  # abstract
-                                                  i["@lang"]]  # lang
-                                                 for i in response["abstract"]]
-            # one abstract
-            else:
-                patent_data_dict["abstracts"] = [response["abstract"]["p"]["$"],  # abstract
-                                                 response["abstract"]["@lang"]]  # lang
-
-            ans.append(patent_data_dict)
+        #print(len(responses_list))
+        if type(responses) == list:
+            for response in responses:
+                ans.append(clean_data_query(response))
+        else:
+            ans.append(clean_data_query(responses))
+            
     return ans
 
 
@@ -451,6 +462,7 @@ test_name_list = [
     "roger pomerantz"
 ]
 
+
 def total_query(testNames):
     test_name_results = []
     for name in testNames:
@@ -461,6 +473,7 @@ def total_query(testNames):
     return  test_name_results 
     
 testing = total_query(test_name_list)
+
 
 #writes all data into file
 with open('OPS_Output.json', 'w', encoding="utf-8") as jsonFile:
