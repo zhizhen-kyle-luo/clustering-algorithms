@@ -1,0 +1,469 @@
+import requests
+import json
+from asci_aap_cleaning_data import combine_list
+from base64 import b64encode
+from time import sleep
+from IPython.display import clear_output
+import hardcoded
+
+def convert_to_b64(x):
+    '''dealing with the consumer key'''
+    return str(b64encode(x.encode("ascii")))[2:-1]
+
+
+consumer_key = "ggL0uIErZSYMGjGoD80goIqzRxCD4r79"
+consumer_secret_key = "BB8Rn3lipyXGiSD6"
+
+key_base64 = convert_to_b64(consumer_key + ":" + consumer_secret_key)
+
+
+def jprint(obj, is_print=True):
+    '''print json nicely
+    obj: return object'''
+    # create a formatted string of the Python JSON object
+    if is_print:
+        print(json.dumps(obj, sort_keys=True, indent=4))
+    else:
+        return json.dumps(obj, sort_keys=True, indent=4)
+
+
+def get_new_token():
+    '''get new token when existing token is expired'''
+    posting_auth_code = requests.post("https://ops.epo.org/3.2/auth/accesstoken",
+                                      headers={
+                                          "Authorization": "Basic " + key_base64,
+                                          "Content-Type": "application/x-www-form-urlencoded"
+                                      },
+                                      data={
+                                          "grant_type": "client_credentials"})
+    sleep(5)
+    return posting_auth_code.json()["access_token"]
+
+
+def handle_special_char(number):
+    '''
+    convert special characters to acceptable forms in get requests
+    number: str
+    '''
+    # if "/" in number or "\\" in number:
+    #     number = "(" + number + ")"
+
+    for k in hardcoded.replace_dict.keys():
+        number = number.replace(k, hardcoded.replace_dict[k])
+
+    return number
+
+
+base_res = "http://ops.epo.org/rest-services"
+
+# constituents=["biblio", "abstract"]
+
+
+def make_res(input_str=None, service="published-data", reference_type="publication", input_format="docdb", endpoint="biblio", constituents=[]):
+    '''make the request string according to params
+    possible service include published-data, family, number, register, legal, classification'''
+    ans = f"{base_res}/{service}/{reference_type}/{input_format}"
+    if input_str != None:
+        ans.append(f"/{input_str}")
+    if endpoint != None:
+        ans = ans + "/" + endpoint
+    if len(constituents) > 0:
+        ans = ans + "/" + ",".join([i for i in constituents])
+    return ans
+
+
+def make_patent_query(input_format, CC, number, KC, date=None):
+    '''
+    take parameters and make the input to go into the search query
+    all parameters are strings
+    '''
+    # cc = country code; ex: US, CA
+    # kc = kind code, read doc
+    # date in YYYYMMDD format
+
+    if input_format == "original":
+        if number == None:
+            raise Exception("original input format must have number")
+        return ".".join([i for i in [CC, number, KC, date] if i != None])
+
+    elif input_format == "docdb":
+        if (number == None or CC == None or KC == None):
+            raise Exception("docbd input format must have number, CC, and KC")
+        return ".".join([i for i in [CC, number, KC, date] if i != None])
+
+    elif input_format == "epodoc":
+        if number == None:
+            raise Exception("epodoc input format must have number, CC, and KC")
+        ans = "".join([i for i in [CC, number, KC] if i != None])
+        if date != None:
+            return ans.append(f'.{date}')
+        return ans
+
+
+def make_name_query(fn, mn, ln):
+    if mn == "":
+        return f'ia={fn} AND ia={ln}'
+    else:
+        return f'(ia={fn} OR ia={mn}) AND ia={ln}'
+
+
+def search_name(fn, ln, mn="", token=get_new_token(), base_url="http://ops.epo.org/3.2/rest-services/published-data/search?q="):
+    '''send the query with listed parameters and gives responses in a list of response in json form'''
+
+    # make the first request
+    res = requests.get(base_url + handle_special_char(make_name_query(fn, mn, ln)),
+                       headers={
+        "Authorization": "Bearer " + token,
+        "Accept": "application/json",
+        "X-OPS-Range": "1-100"
+        # "Content-Type": "application/json"
+    })
+    # if no entity returned, gives empty list
+    if res.status_code == 404:
+        return []
+
+    # add response of first request to answer, get the results count
+    responses = [res.json()]
+    result_count = int(responses[0]["ops:world-patent-data"]
+                       ["ops:biblio-search"]["@total-result-count"])
+    sleep(5)
+    # iterating through the pages until the start of range is greater than total results (ie the page will be empty)
+    search_ranges = [(i, i+99) for i in range(101, 2001, 100)]
+    for r in search_ranges:
+        if result_count < r[0]:
+            break
+        res = requests.get(base_url + handle_special_char(make_name_query(fn, mn, ln)),
+                           headers={
+            "Authorization": "Bearer " + token,
+            "Accept": "application/json",
+            "X-OPS-Range": f"{r[0]}-{r[1]}"
+            # "Content-Type": "application/json"
+        })
+        responses.append(res.json())
+        sleep(5)
+    return responses
+
+
+def get_data_from_name_query(responses):
+    '''collect all return values from search_name()'''
+    patents_list = []
+    # [[doc id type, country code, doc num, kind code, family_id, system], ...]
+    # result_count = int(responses[0]["ops:world-patent-data"]
+    #                    ["ops:biblio-search"]["@total-result-count"])
+    for response in responses:
+        search_result = response["ops:world-patent-data"]["ops:biblio-search"]["ops:search-result"]["ops:publication-reference"]
+        for patent in search_result:
+            patents_list.append([
+                patent["document-id"]["@document-id-type"],
+                patent["document-id"]["country"]["$"],
+                patent["document-id"]["doc-number"]["$"],
+                patent["document-id"]["kind"]["$"],
+                patent["@family-id"]
+                # patent["@system"],
+            ])
+
+    sleep(5)
+    return patents_list
+
+
+def search_patent_via_get(patents_list, token=get_new_token(), range=(1, 100)):
+    '''look up individual patent information based on each patent data from get_data_from_name_query()'''
+    ans = []
+    while len(patents_list) > 0:
+        # if more than 100 patents left to check, take the first 100 and check then repeat loop
+        if len(patents_list) > 100:
+            split_patents_list = patents_list[:100]
+            patents_list = patents_list[100:]
+        # if less than 100 patents left, check all those that are left
+        else:
+            split_patents_list = patents_list
+            patents_list = []
+
+        res = requests.get(make_res(",".join([make_patent_query(handle_special_char(patent_list[0]),
+                                                                handle_special_char(
+            patent_list[1]),
+            handle_special_char(
+            patent_list[2]),
+            handle_special_char(patent_list[3])) for patent_list in split_patents_list])),
+            headers={
+            "Authorization": "Bearer " + token,
+            "Accept": "application/json",
+            "X-OPS-Range": f"{range[0]}-{range[1]}",
+            "Content-Type": "text/plain"
+        })
+        sleep(5)
+        ans.append(res.json()["ops:world-patent-data"]
+                   ["exchange-documents"]["exchange-document"])
+    return ans
+
+
+def search_patent_via_post(patents_list, token=get_new_token()):
+    ans = []
+    while len(patents_list) > 0:
+        # if more than 100 patents left to check, take the first 100 and check then repeat loop
+        if len(patents_list) > 100:
+            split_patents_list = patents_list[:100]
+            patents_list = patents_list[100:]
+        # if less than 100 patents left, check all those that are left
+        else:
+            split_patents_list = patents_list
+            patents_list = []
+        # sending the post request
+        res = requests.post(make_res(),
+                            headers={
+            "Authorization": "Bearer " + token,
+            "Accept": "application/json",
+            # "Accept": "application/exchange+xml",
+            # "X-OPS-Range": f"{range[0]}-{range[1]}",
+            "Content-Type": "text/plain",
+        },
+            data="\n".join([make_patent_query(handle_special_char(patent_list[0]),
+                                              handle_special_char(
+                patent_list[1]),
+                handle_special_char(
+                patent_list[2]),
+                handle_special_char(patent_list[3])) for patent_list in split_patents_list])
+        )
+        ans.append(res.json()["ops:world-patent-data"]
+                   ["exchange-documents"]["exchange-document"])
+        sleep(5)
+        
+    return ans
+
+
+
+def get_data_from_patent_query(responses_list):
+    '''pass in the response from search_patent() to get data about the patent'''
+
+    ans = []
+    for responses in responses_list:
+        #jprint(responses) #TRYING TO TROUBLESHOOT
+        for response in responses:
+            #try:
+                #doc_id = response["bibliographic-data"]["application-reference"]["@doc-id"]
+            #except TypeError:
+                #print("----------------BIBLIOGRAPHIC DATA----------------")
+                #jprint(response)
+            patent_data_dict = {
+                # basic info about patent, application date code may need to be changed
+                "doc_id": response["bibliographic-data"]["application-reference"]["@doc-id"], #PROBLEM ARISING HERE
+                "family_id": response["@family-id"]
+            }
+            # COUNTRY
+            patent_data_dict["country"] = response["bibliographic-data"]["application-reference"]["document-id"][0]["country"]["$"]
+
+            # DATE
+            if "date" in response["bibliographic-data"]["application-reference"]["document-id"][1].keys():
+                # has date
+                patent_data_dict["application_date"] = response[
+                    "bibliographic-data"]["application-reference"]["document-id"][1]["date"]["$"]
+                # patent_data_dict["application_date"] = pd.to_datetime(response[
+                #     "bibliographic-data"]["application-reference"]["document-id"][1]["date"]["$"])
+            else:
+                # doesn't have date
+                patent_data_dict["application_date"] = None
+
+            # APPLICANT
+            if "applicants" in response["bibliographic-data"]["parties"].keys():
+                # if applicant section is listed
+                if type(response["bibliographic-data"]["parties"]["applicants"]["applicant"]) == list:
+                    # multiple applicants
+                    patent_data_dict["applicants_list_original"] = [i["applicant-name"]["name"]["$"]
+                                                                    # [
+                                                                    # int(i["@sequence"]),  # applicant sequence
+                                                                    # i["applicant-name"]["name"]]  # applicant name
+                                                                    for i in response["bibliographic-data"]["parties"]["applicants"]["applicant"] if i["@data-format"] == "original"]
+
+                    patent_data_dict["applicants_list_epodoc"] = [i["applicant-name"]["name"]["$"]
+                                                                  # [
+                                                                  # int(i["@sequence"]),  # applicant sequence
+                                                                  # i["applicant-name"]["name"]]  # applicant name
+                                                                  for i in response["bibliographic-data"]["parties"]["applicants"]["applicant"] if i["@data-format"] == "epodoc"]
+                else:
+                    # one applicant
+                    # assume if only one name, name is in original format
+                    patent_data_dict["applicants_list_original"] = [response["bibliographic-data"]
+                                                                    ["parties"]["applicants"]["applicant"]["applicant-name"]["name"]["$"]]
+                    patent_data_dict["applicants_list_epodoc"] = []
+            else:
+                patent_data_dict["applicants_list_original"] = []
+                patent_data_dict["applicants_list_epodoc"] = []
+
+            # INVENTOR
+            if "inventors" in response["bibliographic-data"]["parties"].keys():
+                if "inventor" in response["bibliographic-data"]["parties"]["inventors"].keys():
+                    # has inventor(s)
+                    if type(response["bibliographic-data"]["parties"]["inventors"]["inventor"]) == list:
+                        # if has multiple inventors
+                        patent_data_dict["inventors_list_original"] = [i["inventor-name"]["name"]["$"]
+                                                                       # [
+                                                                       # int(i["@sequence"]),  # inventor sequence
+                                                                       # i["inventor-name"]["name"]["$"]]  # name of inventor
+                                                                       for i in response["bibliographic-data"]["parties"]["inventors"]["inventor"] if i["@data-format"] == "original"]
+
+                        patent_data_dict["inventors_list_epodoc"] = [i["inventor-name"]["name"]["$"]
+                                                                     # [
+                                                                     # int(i["@sequence"]),  # inventor sequence
+                                                                     # i["inventor-name"]["name"]["$"]]  # name of inventor
+                                                                     for i in response["bibliographic-data"]["parties"]["inventors"]["inventor"] if i["@data-format"] == "epodoc"]
+                    else:
+                        # if only one investor is listed, assume that it's in original format
+                        patent_data_dict["inventors_list_original"] = [
+                            response["bibliographic-data"]["parties"]["inventors"]["inventor"]["inventor-name"]["name"]["$"]]
+                        patent_data_dict["inventors_list_epodoc"] = []
+                else:
+                    # weird error
+                    # print(
+                    #     "----------------------HAS INVENTORS BUT NOT INVENTOR----------------------")
+                    # jprint(response)
+                    raise Exception("------PROBLEM AROUND LINE 349------")
+            # no inventor listed
+            else:
+                patent_data_dict["inventors_list_original"] = []
+                patent_data_dict["inventors_list_epodoc"] = []
+
+            # TITLE
+            if "invention-title" not in response["bibliographic-data"].keys():
+                # no title available
+                patent_data_dict["invention_titles"] = []
+            # multiple titles available
+            elif type(response["bibliographic-data"]["invention-title"]) == list:
+                patent_data_dict["invention_titles"] = [
+                    [i["$"],  # name
+                     i["@lang"]]  # language
+                    for i in response["bibliographic-data"]["invention-title"]]
+            # one title
+            else:
+                patent_data_dict["invention_titles"] = [
+                    [response["bibliographic-data"]["invention-title"]["$"],  # name
+                     response["bibliographic-data"]["invention-title"]["@lang"]]]  # language
+
+            # ABSTRACT
+            if "abstract" not in response.keys():
+                # no abstract available
+                patent_data_dict["abstracts"] = []
+            elif type(response["abstract"]) == list:
+                # multiple abstracts
+                patent_data_dict["abstracts"] = [[i["p"]["$"],  # abstract
+                                                  i["@lang"]]  # lang
+                                                 for i in response["abstract"]]
+            # one abstract
+            else:
+                patent_data_dict["abstracts"] = [response["abstract"]["p"]["$"],  # abstract
+                                                 response["abstract"]["@lang"]]  # lang
+
+            ans.append(patent_data_dict)
+    return ans
+
+
+def author_is_inventor(author, data):
+    '''author is a tuple of (fn, ln, mn)
+    data a dict that is returned by the get_data_from_patent_query() function'''
+
+    [fn, ln, mn] = [n.lower() for n in author]
+    for inventor_name in data["inventors_list_original"]:
+        if ln in inventor_name.lower():
+            if fn in inventor_name.lower():  # if fn and ln in name, then assume that it is the right name
+                return True
+            # if mn and ln in name, then assume that it is the right name
+            elif mn in inventor_name.lower() and mn != "":
+                return True
+    return False
+
+
+def author_is_applicant(author, data):
+    '''author is a tuple of (fn, ln, mn)
+    data a dict that is returned by the get_data_from_patent_query() function'''
+
+    [fn, ln, mn] = [n.lower() for n in author]
+    for applicant_name in data["applicants_list_original"]:
+        if ln in applicant_name.lower():
+            if fn in applicant_name.lower():  # if fn and ln in name, then assume that it is the right name
+                return True
+            # if mn and ln in name, then assume that it is the right name
+            elif mn in applicant_name.lower() and mn != "":
+                return True
+    return False
+
+
+def unique_patents(patents_list):
+    '''pass in output of get_data_from_name_query to get back patents from unique families'''
+    family_id_dict = {}
+
+    # puting patents in dictionary of family id: patents
+    for patent in patents_list:
+        if patent[4] not in family_id_dict.keys():
+            family_id_dict[patent[4]] = patent
+        elif patent[1] in "US CA EP":
+            family_id_dict[patent[4]] = patent
+
+    # iterating through each family to find the representative patent
+
+    return list(family_id_dict.values())
+
+
+def find_patents(fn, ln, mn="", token=get_new_token()):
+    '''final function to input name and get patents'''
+    name_responses = search_name(fn, ln, mn, token=token)
+    # return emplty list if no response from name query
+    if name_responses == []:
+        return []
+    clean_name_responses = unique_patents(
+        get_data_from_name_query(name_responses))
+    # print("----------LEN CLEAN NAME RESPONSES----------")
+    # print(len(clean_name_responses))
+    patent_responses = search_patent_via_post(clean_name_responses)
+    clean_patent_responses = get_data_from_patent_query(patent_responses)
+    ans = [patent for patent in clean_patent_responses if author_is_inventor(
+        (fn, ln, mn), patent) == True or author_is_applicant((fn, ln, mn), patent) == True]
+    return ans
+
+
+def make_list_for_csv(patent):
+    return[
+        patent['country'],
+        patent['doc_id'],
+        patent['family_id'],
+        patent['application_date'],
+        patent['invention_titles'],
+        patent['abstracts'],
+        patent['applicants_list_epodoc'],
+        patent['applicants_list_original'],
+        patent['inventors_list_epodoc'],
+        patent['inventors_list_original'],
+    ]
+
+
+# need new token every 20 min
+token = get_new_token()
+
+# running test searches
+test_name_list = [
+    "william pao",
+    "frederick suchy",
+    "malcolm cox",
+    "nancy cooke",
+    "allan sniderman",
+    "vincent dennis",
+    "alessandra pernis",
+    "john minna",
+    "dennis bier",
+    "roger pomerantz"
+]
+
+def total_query(testNames):
+    test_name_results = []
+    for name in testNames:
+        (fn, ln) = name.split()
+        patents = find_patents(fn, ln, token=token)
+        test_name_results.append(patents)
+        print(name, 'num patents:', len(patents))
+    return  test_name_results 
+    
+testing = total_query(test_name_list)
+
+#writes all data into file
+with open('OPS_Output.json', 'w', encoding="utf-8") as jsonFile:
+    i = testing
+    json.dump(i, jsonFile , ensure_ascii=False, indent=4)
+
