@@ -1,6 +1,6 @@
 import requests
 import json
-import sqlite3
+# import sqlite3
 from requests.exceptions import Timeout
 
 # Get ID Information
