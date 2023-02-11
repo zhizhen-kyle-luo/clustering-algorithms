@@ -24,6 +24,16 @@ The repository is organized in the following way. At the root directory, there a
 
 Aside from these files, there are folders in the repository. With the exceptions of _pycache_ and demo, each folder contains files and data that are used to upload data from online databases to our MySQL database.
 
+### SQLConnect.py
+
+In SQLConnect.py, there are several functions and classes that can help you with querying the database. The first and most useful one would be connect_and_query, which is a function that takes in a list of queries, another list containing the kind of queries being made, and the name of the database that we are querying to in str. Note that the two lists must be of same sizes, and both are lists of strings.
+
+The next is the insert_query_dict, which helps you make MySQL INSERT queries. The inputs contain the name of the targetted table in string, and a dictionary mapping table fields to the values that you want to insert. The table fields are strings, while values can be numbers, strings, or None. Use numbers when you are inserting numeric values, None when you want to leave a field blank, and strings otherwise. Some fields in our tables are ID fields that will autofill itself, do not include these fields in the input's dictionary.
+
+There is also the insert_query function, which was an older version of the insert_query_dict. Instead of using a dictionary to represent the input, this function takes in a tuple of the name of the fields, a tuple of the values to be inserted, and a tuple of the type of values for the fields. All these tuples have the same length so that we can correspond each field with a value and a type. There are two types, represented by strings, "num" which suggests that the values are numeric and that the values should not be encapsulated by quotes, and "str" which suggests otherwise. It is recommended that you switch to using insert_query_dict from now on as this function tends to be less straight-forward to use.
+
+Finally, there are two classes, each with numerous methods. Each class corresponds to one database, and each method in it corresponds to a table in the database. Each method's purpose was to take in entries, and output an INSERT query to insert the entries to the table that corresponds to the method.
+
 ## GitHub
 
 For collaboration, you need to first create a local copy of the repository in the following way
