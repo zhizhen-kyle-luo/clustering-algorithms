@@ -190,51 +190,26 @@ class UnmergedV1:
         column_names = ("people_id", "bio_id")
         entry_types = ("num", "num")
         return insert_query("PeopleSpec", column_names, entry_types, entry)
-
-    def project(entry):
-        column_names = ("origin_database", "title", "start_date")
-        entry_types = ("str", "str", "str")
-        return insert_query("Project", column_names, entry_types, entry)
-
-    def project_alias_id(entry):
-        column_names = ("project_id", "alias_id")
-        entry_types = ("num", "num")
-        return insert_query("ProjectAliasID", column_names, entry_types, entry)
-
-    def pub_alias_id(entry):
-        column_names = ("pub_id", "alias_id")
-        entry_types = ("num", "num")
-        return insert_query("PubAliasID", column_names, entry_types, entry)
     
-    def project_pub(entry):
-        column_names = ("project_id", "pub_id")
-        entry_types = ("num", "num")
-        return insert_query("ProjectPub", column_names, entry_types, entry)
-
-    def publication(entry):
-        column_names = ("origin_database", "title", "pmid")
-        entry_types = ("str", "str", "num")
-        return insert_query("Publication", column_names, entry_types, entry)
-
-    def source(entry):
-        column_names = ("work_id", "source")
-        entry_types = ("num", "str")
-        return insert_query("Source", column_names, entry_types, entry)
-
     def work(entry):
-        column_names = ("project_id", "pub_id")
-        entry_types = ("num", "num")
+        column_names = ("origin_database", "title", "start_date", "end_date", "type", "pmid")
+        entry_types = ("str", "str", "str", "str", "str", "num")
         return insert_query("Work", column_names, entry_types, entry)
-
+    
     def work_org(entry):
         column_names = ("work_id", "org_id")
         entry_types = ("num", "num")
         return insert_query("WorkOrg", column_names, entry_types, entry)
-
+    
     def work_people(entry):
         column_names = ("work_id", "people_id")
         entry_types = ("num", "num")
         return insert_query("WorkPeople", column_names, entry_types, entry)
+    
+    def work_relation(entry):
+        column_names = ("work_id1", "work_id2", "relation")
+        entry_types = ("num", "num", "str")
+        return insert_query("WorkRelation", column_names, entry_types, entry)
 
 
 
