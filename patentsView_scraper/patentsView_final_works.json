@@ -1,0 +1,663 @@
+{
+    "5500522": {
+        "id": "5500522",
+        "earliest_date": "1994-05-27",
+        "abstract": "A pixel comprises a Field Effect Transistor formed on a gallium arsenide substrate wherein a source (1) of the field effect transistor is a photoresponsive element, a gate of the field effect transistor is shielded from light and acts as a switch to enable/disable readout and a drain (4) of the field effect transistor is connected to a readout line. Also disclosed an X-Y imager formed on a gallium arsenide substrate from a plurality of pixels and a processing area wherein each pixel comprises a photoresponsive source (1), a gate formed from a plurality of metal fingers (7) across the source (1), a drain (4) connected to a readout line and a gate resistor (12) connected in series with the fingers (7). The arrangement of fingers (7) across the source (1) in co-operation with the gate resistor (12) produces an enhanced optical gain.",
+        "created_date": "1996-03-19",
+        "cited_count": 7,
+        "cited_by_count": 8,
+        "title": "Gallium arsenide MESFET imager",
+        "type": "utility",
+        "application": [
+            {
+                "application_id": "08/211373",
+                "application_type": "08",
+                "filing_type": "08",
+                "filing_date": "1994-05-27"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:de_ln:abbott-3",
+                "name_first": "Derek",
+                "name_last": "Abbott",
+                "position": 1
+            },
+            {
+                "id": "fl:ka_ln:eshraghian-1",
+                "name_first": "Kamran",
+                "name_last": "Eshraghian",
+                "position": 0
+            }
+        ],
+        "assignees": [
+            {
+                "id": "a7002a21-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Luminis Pty. Ltd."
+            }
+        ],
+        "year": 1996,
+        "related_documents": [],
+        "us_term_of_grant": [],
+        "api": "patentsView"
+    },
+    "6542016": {
+        "id": "6542016",
+        "earliest_date": "2001-12-10",
+        "abstract": "A binary digital logic level sensitive latch comprising a first inverter that provides an output (O1). At least one input signal (I1) and an activation signal (Clk) are provided to the first inventer both being capacitively coupled to an input of the first inverter and a switching threshold of the first inverter. The capacitance of the couplings being predetermined such that the output of the first inverter (O1) is a NOR function of the inputs signals and the activation signal O1={overscore (I1+Clk)}. A second inverter has as inputs capacitively coupled the output of the first inverter (O1), the activation signal (Clk) and an inverted pervious output signal (P) to provide output (O2). A switching threshold of the second inverter and the capacitance of the couplings being predetermined such that the output of the second inverter (O2) takes the function of: O2={overscore ((Clk&times;P)+O1)}.",
+        "created_date": "2003-04-01",
+        "cited_count": 3,
+        "cited_by_count": 0,
+        "title": "Level sensitive latch",
+        "type": "utility",
+        "application": [
+            {
+                "application_id": "10/016153",
+                "application_type": "10",
+                "filing_type": "10",
+                "filing_date": "2001-12-10"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:sa_ln:alsarawi-2",
+                "name_first": "Said",
+                "name_last": "Al-Sarawi",
+                "position": 2
+            },
+            {
+                "id": "fl:pe_ln:celinski-1",
+                "name_first": "Peter",
+                "name_last": "Celinski",
+                "position": 0
+            },
+            {
+                "id": "fl:de_ln:abbott-3",
+                "name_first": "Derek",
+                "name_last": "Abbott",
+                "position": 1
+            }
+        ],
+        "assignees": [
+            {
+                "id": "4d03c6b6-2f00-11ed-aea8-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Luminis Pty. Ltd."
+            }
+        ],
+        "year": 2003,
+        "related_documents": [
+            {
+                "id": "20020153931",
+                "type": "related-publication"
+            }
+        ],
+        "us_term_of_grant": [],
+        "api": "patentsView"
+    },
+    "6605808": {
+        "id": "6605808",
+        "earliest_date": "2001-12-10",
+        "abstract": "A diagnostic apparatus including a terahertz generator taking the form of a femtosecond laser exciting either an optoelectric crystal of a photoconductive dipole antenna the terahertz radiation is directed onto a target preferably held close by or abutting an enclosure including a reflection receiving window and housing terahertz detector for detecting terahertz radiation. Preferably the terahertz radiation generator forms part of the receiving window. The enclosure has a modified atmosphere to permit ready transmission of terahertz radiation. A beam splitter is positioned between the laser and the terahertz generator to split off a probe laser beam from the terahertz inducing laser radiation which is also directed to the detector means. The output from the detector being determined by the amplitude of that part of the reflected teraherz radiation wave coaligned with the probe laser at the detector. A delay is positioned in the probe laser path to altering the length of the probe laser path over terahertz subwavelength distances so that different parts of the terahertz wave form can be interrogated by the probe laser to thereby ascertain the shape and dimensions of the reflected terahertz radiation.",
+        "created_date": "2003-08-12",
+        "cited_count": 8,
+        "cited_by_count": 22,
+        "title": "Diagnostic apparatus using terahertz radiation",
+        "type": "utility",
+        "application": [
+            {
+                "application_id": "10/016489",
+                "application_type": "10",
+                "filing_type": "10",
+                "filing_date": "2001-12-10"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:de_ln:abbott-3",
+                "name_first": "Derek",
+                "name_last": "Abbott",
+                "position": 1
+            },
+            {
+                "id": "fl:sa_ln:mickan-1",
+                "name_first": "Samuel",
+                "name_last": "Mickan",
+                "position": 0
+            }
+        ],
+        "assignees": [
+            {
+                "id": "a7002a21-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Luminis Pty. Ltd."
+            }
+        ],
+        "year": 2003,
+        "related_documents": [
+            {
+                "id": "20020074500",
+                "type": "related-publication"
+            }
+        ],
+        "us_term_of_grant": [
+            {
+                "disclaimer_date": null
+            }
+        ],
+        "api": "patentsView"
+    },
+    "8424211": {
+        "id": "8424211",
+        "earliest_date": "2010-08-31",
+        "abstract": "A pivoting hand tool is provided including handle structures which control the relative angular position of pivotable arms to allow disassembly and reassembly and to prevent accidental disassembly during use. Handle structures includes an elastic interference portion which provides a first interference between the first arm and second arm at the predetermined angle to prevent angular displacement of the arms from exceeding a first predetermined angle until a disassembly pivoting force is applied to the first arm and the second arm.",
+        "created_date": "2013-04-23",
+        "cited_count": 17,
+        "cited_by_count": 0,
+        "title": "Separable scissors with elastic stoppers",
+        "type": "utility",
+        "application": [
+            {
+                "application_id": "12/872607",
+                "application_type": "12",
+                "filing_type": "12",
+                "filing_date": "2010-08-31"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:fr_ln:clementi-3",
+                "name_first": "Frank",
+                "name_last": "Clementi",
+                "position": 3
+            },
+            {
+                "id": "fl:th_ln:hartman-4",
+                "name_first": "Thomas W.",
+                "name_last": "Hartman",
+                "position": 1
+            },
+            {
+                "id": "fl:ev_ln:abel-1",
+                "name_first": "Evan",
+                "name_last": "Abel",
+                "position": 2
+            },
+            {
+                "id": "fl:lu_ln:nene-1",
+                "name_first": "Lucas O.",
+                "name_last": "Nene",
+                "position": 0
+            }
+        ],
+        "assignees": [
+            {
+                "id": "3888549d-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Helen of Troy Limited"
+            }
+        ],
+        "year": 2013,
+        "related_documents": [
+            {
+                "id": "20120047751",
+                "type": "related-publication"
+            }
+        ],
+        "us_term_of_grant": [
+            {
+                "disclaimer_date": null
+            }
+        ],
+        "api": "patentsView"
+    },
+    "D618969": {
+        "id": "D618969",
+        "earliest_date": "2009-11-12",
+        "abstract": null,
+        "created_date": "2010-07-06",
+        "cited_count": 9,
+        "cited_by_count": 5,
+        "title": "Corn holder storage device",
+        "type": "design",
+        "application": [
+            {
+                "application_id": "29/350164",
+                "application_type": "29",
+                "filing_type": "29",
+                "filing_date": "2009-11-12"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:an_ln:dibitonto-1",
+                "name_first": "Anthony",
+                "name_last": "Di Bitonto",
+                "position": 0
+            },
+            {
+                "id": "fl:hi_ln:matsui-33",
+                "name_first": "Hideaki",
+                "name_last": "Matsui",
+                "position": 1
+            },
+            {
+                "id": "fl:ni_ln:oxley-2",
+                "name_first": "Nicholas",
+                "name_last": "Oxley",
+                "position": 2
+            },
+            {
+                "id": "fl:ev_ln:abel-1",
+                "name_first": "Evan",
+                "name_last": "Abel",
+                "position": 3
+            }
+        ],
+        "assignees": [
+            {
+                "id": "3888549d-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Helen of Troy Limited"
+            }
+        ],
+        "year": 2010,
+        "related_documents": [],
+        "us_term_of_grant": [
+            {
+                "disclaimer_date": null
+            }
+        ],
+        "api": "patentsView"
+    },
+    "D620326": {
+        "id": "D620326",
+        "earliest_date": "2009-12-09",
+        "abstract": null,
+        "created_date": "2010-07-27",
+        "cited_count": 6,
+        "cited_by_count": 3,
+        "title": "Kernel removal device",
+        "type": "design",
+        "application": [
+            {
+                "application_id": "29/351653",
+                "application_type": "29",
+                "filing_type": "29",
+                "filing_date": "2009-12-09"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:an_ln:dibitonto-1",
+                "name_first": "Anthony",
+                "name_last": "Di Bitonto",
+                "position": 1
+            },
+            {
+                "id": "fl:hi_ln:matsui-33",
+                "name_first": "Hideaki",
+                "name_last": "Matsui",
+                "position": 2
+            },
+            {
+                "id": "fl:ni_ln:oxley-2",
+                "name_first": "Nicholas",
+                "name_last": "Oxley",
+                "position": 0
+            },
+            {
+                "id": "fl:da_ln:turk-5",
+                "name_first": "Daniel",
+                "name_last": "Turk",
+                "position": 5
+            },
+            {
+                "id": "fl:st_ln:tesdal-1",
+                "name_first": "Stian",
+                "name_last": "Tesdal",
+                "position": 3
+            },
+            {
+                "id": "fl:ev_ln:abel-1",
+                "name_first": "Evan",
+                "name_last": "Abel",
+                "position": 4
+            }
+        ],
+        "assignees": [
+            {
+                "id": "3888549d-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Helen of Troy Limited"
+            }
+        ],
+        "year": 2010,
+        "related_documents": [],
+        "us_term_of_grant": [
+            {
+                "disclaimer_date": null
+            }
+        ],
+        "api": "patentsView"
+    },
+    "D655582": {
+        "id": "D655582",
+        "earliest_date": "2011-09-28",
+        "abstract": null,
+        "created_date": "2012-03-13",
+        "cited_count": 8,
+        "cited_by_count": 4,
+        "title": "Container",
+        "type": "design",
+        "application": [
+            {
+                "application_id": "29/402878",
+                "application_type": "29",
+                "filing_type": "29",
+                "filing_date": "2011-09-28"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:ma_ln:kida-3",
+                "name_first": "Makiko",
+                "name_last": "Kida",
+                "position": 2
+            },
+            {
+                "id": "fl:ta_ln:matsumoto-15",
+                "name_first": "Tamotsu",
+                "name_last": "Matsumoto",
+                "position": 0
+            },
+            {
+                "id": "fl:mi_ln:wakabayashi-14",
+                "name_first": "Miho",
+                "name_last": "Wakabayashi",
+                "position": 3
+            },
+            {
+                "id": "fl:da_ln:turk-2",
+                "name_first": "David A.",
+                "name_last": "Turk",
+                "position": 5
+            },
+            {
+                "id": "fl:ev_ln:abel-1",
+                "name_first": "Evan",
+                "name_last": "Abel",
+                "position": 4
+            },
+            {
+                "id": "fl:ma_ln:araki-28",
+                "name_first": "Masaru",
+                "name_last": "Araki",
+                "position": 1
+            }
+        ],
+        "assignees": [
+            {
+                "id": "3888549d-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Helen of Troy Limited"
+            }
+        ],
+        "year": 2012,
+        "related_documents": [],
+        "us_term_of_grant": [
+            {
+                "disclaimer_date": null
+            }
+        ],
+        "api": "patentsView"
+    },
+    "D681395": {
+        "id": "D681395",
+        "earliest_date": "2012-07-25",
+        "abstract": null,
+        "created_date": "2013-05-07",
+        "cited_count": 18,
+        "cited_by_count": 4,
+        "title": "Interlocking container",
+        "type": "design",
+        "application": [
+            {
+                "application_id": "29/428018",
+                "application_type": "29",
+                "filing_type": "29",
+                "filing_date": "2012-07-25"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:ma_ln:kida-3",
+                "name_first": "Makiko",
+                "name_last": "Kida",
+                "position": 1
+            },
+            {
+                "id": "fl:ta_ln:matsumoto-15",
+                "name_first": "Tamotsu",
+                "name_last": "Matsumoto",
+                "position": 0
+            },
+            {
+                "id": "fl:ta_ln:watanabe-105",
+                "name_first": "Takuma",
+                "name_last": "Watanabe",
+                "position": 2
+            },
+            {
+                "id": "fl:ev_ln:abel-1",
+                "name_first": "Evan",
+                "name_last": "Abel",
+                "position": 3
+            }
+        ],
+        "assignees": [
+            {
+                "id": "3888549d-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Helen of Troy Limited"
+            }
+        ],
+        "year": 2013,
+        "related_documents": [],
+        "us_term_of_grant": [
+            {
+                "disclaimer_date": null
+            }
+        ],
+        "api": "patentsView"
+    },
+    "D694584": {
+        "id": "D694584",
+        "earliest_date": "2012-07-25",
+        "abstract": null,
+        "created_date": "2013-12-03",
+        "cited_count": 25,
+        "cited_by_count": 2,
+        "title": "Container configuration",
+        "type": "design",
+        "application": [
+            {
+                "application_id": "29/428016",
+                "application_type": "29",
+                "filing_type": "29",
+                "filing_date": "2012-07-25"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:ma_ln:kida-3",
+                "name_first": "Makiko",
+                "name_last": "Kida",
+                "position": 1
+            },
+            {
+                "id": "fl:ta_ln:matsumoto-15",
+                "name_first": "Tamotsu",
+                "name_last": "Matsumoto",
+                "position": 0
+            },
+            {
+                "id": "fl:ta_ln:watanabe-105",
+                "name_first": "Takuma",
+                "name_last": "Watanabe",
+                "position": 2
+            },
+            {
+                "id": "fl:ev_ln:abel-1",
+                "name_first": "Evan",
+                "name_last": "Abel",
+                "position": 3
+            }
+        ],
+        "assignees": [
+            {
+                "id": "3888549d-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Helen of Troy Limited"
+            }
+        ],
+        "year": 2013,
+        "related_documents": [],
+        "us_term_of_grant": [
+            {
+                "disclaimer_date": null
+            }
+        ],
+        "api": "patentsView"
+    },
+    "D694585": {
+        "id": "D694585",
+        "earliest_date": "2012-08-23",
+        "abstract": null,
+        "created_date": "2013-12-03",
+        "cited_count": 25,
+        "cited_by_count": 4,
+        "title": "Container configuration",
+        "type": "design",
+        "application": [
+            {
+                "application_id": "29/430267",
+                "application_type": "29",
+                "filing_type": "29",
+                "filing_date": "2012-08-23"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:ma_ln:kida-3",
+                "name_first": "Makiko",
+                "name_last": "Kida",
+                "position": 1
+            },
+            {
+                "id": "fl:ta_ln:matsumoto-15",
+                "name_first": "Tamotsu",
+                "name_last": "Matsumoto",
+                "position": 0
+            },
+            {
+                "id": "fl:ta_ln:watanabe-105",
+                "name_first": "Takuma",
+                "name_last": "Watanabe",
+                "position": 2
+            },
+            {
+                "id": "fl:ev_ln:abel-1",
+                "name_first": "Evan",
+                "name_last": "Abel",
+                "position": 3
+            }
+        ],
+        "assignees": [
+            {
+                "id": "3888549d-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Helen of Troy Limited"
+            }
+        ],
+        "year": 2013,
+        "related_documents": [],
+        "us_term_of_grant": [
+            {
+                "disclaimer_date": null
+            }
+        ],
+        "api": "patentsView"
+    },
+    "D694628": {
+        "id": "D694628",
+        "earliest_date": "2012-08-23",
+        "abstract": null,
+        "created_date": "2013-12-03",
+        "cited_count": 25,
+        "cited_by_count": 3,
+        "title": "Container configuration",
+        "type": "design",
+        "application": [
+            {
+                "application_id": "29/430266",
+                "application_type": "29",
+                "filing_type": "29",
+                "filing_date": "2012-08-23"
+            }
+        ],
+        "inventors": [
+            {
+                "id": "fl:ma_ln:kida-3",
+                "name_first": "Makiko",
+                "name_last": "Kida",
+                "position": 1
+            },
+            {
+                "id": "fl:ta_ln:matsumoto-15",
+                "name_first": "Tamotsu",
+                "name_last": "Matsumoto",
+                "position": 0
+            },
+            {
+                "id": "fl:ta_ln:watanabe-105",
+                "name_first": "Takuma",
+                "name_last": "Watanabe",
+                "position": 2
+            },
+            {
+                "id": "fl:ev_ln:abel-1",
+                "name_first": "Evan",
+                "name_last": "Abel",
+                "position": 3
+            }
+        ],
+        "assignees": [
+            {
+                "id": "3888549d-16c8-11ed-9b5f-1234bde3cd05",
+                "name_first": null,
+                "name_last": null,
+                "organization": "Helen of Troy Limited"
+            }
+        ],
+        "year": 2013,
+        "related_documents": [],
+        "us_term_of_grant": [
+            {
+                "disclaimer_date": null
+            }
+        ],
+        "api": "patentsView"
+    }
+}

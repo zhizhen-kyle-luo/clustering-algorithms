@@ -1,0 +1,54 @@
+{
+    "Derek Abbott": {
+        "fl:de_ln:abbott-3": {
+            "id": "fl:de_ln:abbott-3",
+            "counts_by_year": [
+                {
+                    "year": 1996,
+                    "works_count": 1
+                },
+                {
+                    "year": 2003,
+                    "works_count": 2
+                }
+            ],
+            "name_first": "Derek",
+            "name_last": "Abbott",
+            "gender": 1,
+            "last_known_state": null,
+            "last_known_country": "AU",
+            "created_date": null,
+            "works_count": 3,
+            "api": "patentsView",
+            "works": []
+        }
+    },
+    "Evan Abel": {
+        "fl:ev_ln:abel-1": {
+            "id": "fl:ev_ln:abel-1",
+            "counts_by_year": [
+                {
+                    "year": 2010,
+                    "works_count": 2
+                },
+                {
+                    "year": 2012,
+                    "works_count": 1
+                },
+                {
+                    "year": 2013,
+                    "works_count": 5
+                }
+            ],
+            "name_first": "Evan",
+            "name_last": "Abel",
+            "gender": 1,
+            "last_known_state": "NY",
+            "last_known_country": "US",
+            "created_date": null,
+            "works_count": 8,
+            "api": "patentsView",
+            "works": []
+        }
+    }
+}
