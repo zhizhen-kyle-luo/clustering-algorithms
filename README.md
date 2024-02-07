@@ -1,7 +1,11 @@
 # Data Science Analysis: Measuring Impact of Physician-Scientists on Innovation, Research, and Economy
 
 ## Database
+Current:
+OpenSource SQL database called CockroachDB
 
+
+Old Database:
 We are currently working with the MIT SIPB MySQL Database service, which allows 100MB of total storage for free.
 The following is the instruction for accessing the database through MIT SIPB’s webpage that you can use to add or drop entire databases:
 
