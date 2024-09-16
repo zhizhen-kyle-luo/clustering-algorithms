@@ -4,6 +4,17 @@
 Current:
 OpenSource SQL database called CockroachDB
 
+## Coding Convention
+Previously committed code in this GitHub is mostly in ipynb form; this isn't great coding convention. We would like our committed files to be in py form. Feel free to test in ipynb, but please convert to py form before merging into the master branch in our GitHub.
+
+### Unfinished Code
+
+https://docs.google.com/document/d/17AjkavTLgSq9g-ew_HVBQ7thOBMdOWM_NKpEY3MEa5A/edit
+Rule of thumb is to only commit to GitHub if your code is mature, or usable
+For other cases, such as your code still being under work, write the code in Google Colab and link it to the above Google Doc.
+You are in charge of updating any work you do with a link to the document + brief explanation of what the code does, as well as removing the link and explanation (which you should have transferred as comments to your code) once your code is merged into GitHub.
+
+
 ### GitHub
 
 For collaboration, you need to first create a local copy of the repository in the following way
