@@ -5,7 +5,7 @@ Current:
 OpenSource SQL database called CockroachDB
 
 ## Coding Convention
-Previously committed code in this GitHub is mostly in ipynb form; this isn't great coding convention. We would like our committed files to be in py form. Feel free to test in ipynb, but please convert to py form before merging into the master branch in our GitHub.
+Previously committed code in this GitHub is mostly in ipynb form; this isn't great coding convention. We would like our committed files to be in py form. Feel free to test in ipynb, but please convert to py form before merging into the master branch in our GitHub. More detail about coding convention that every file committed to the GitHub is expected to follow is written in this document: https://docs.google.com/document/d/1KpBOtAjlxDpj1vl0yPYl7lBCo0Nog1zFp_9L0dePMS8.
 
 ### Unfinished Code
 
