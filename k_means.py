@@ -217,11 +217,28 @@ class NameDisambiguator:
         # Prepare features for clustering
         X = self.prepare_features(matches)
         
+        # Determine valid range for number of clusters
+        min_clusters = 2
+        max_clusters = min(len(matches) - 1, 5)  # Either 5 or one less than number of samples
+        
+        if max_clusters < min_clusters:
+            # If we can't do clustering, just show similarity between pairs
+            similarity = cosine_similarity(X)
+            print("\nPairwise Similarities:")
+            for i in range(len(matches)):
+                for j in range(i+1, len(matches)):
+                    sim = similarity[i,j]
+                    if sim > threshold:
+                        print(f"\nPotential match (similarity: {sim:.3f}):")
+                        print(f"1. {matches.iloc[i]['first_name']} {matches.iloc[i]['last_name']} ({int(matches.iloc[i]['year'])})")
+                        print(f"2. {matches.iloc[j]['first_name']} {matches.iloc[j]['last_name']} ({int(matches.iloc[j]['year'])})")
+            return
+        
         # Find optimal number of clusters using silhouette score
-        best_n_clusters = 2
+        best_n_clusters = min_clusters
         best_score = -1
         
-        for n_clusters in range(2, min(len(matches), 5) + 1):
+        for n_clusters in range(min_clusters, max_clusters + 1):
             kmeans = KMeans(n_clusters=n_clusters, random_state=42)
             clusters = kmeans.fit_predict(X)
             score = silhouette_score(X, clusters)
@@ -288,21 +305,116 @@ class NameDisambiguator:
                 print(f"Affiliations: {entry['affiliation']}")
                 print(f"Email: {entry['email']}")
 
+class DuplicateRecordFinder:
+    def __init__(self, csv_path='150physicianscientists.csv'):
+        self.df = pd.read_csv(csv_path)
+        # Convert string lists to actual lists
+        list_columns = ['original specialization', 'affiliation', 'email_affiliation', 
+                       'umbrella_aff', 'related_aff', 'umbrella_spec', 'related_spec']
+        for col in list_columns:
+            self.df[col] = self.df[col].apply(lambda x: eval(x) if isinstance(x, str) else [])
+
+    def prepare_features(self, entries):
+        """Prepare features for similarity comparison"""
+        feature_matrices = []
+        
+        # Year feature (normalized)
+        year_scaled = StandardScaler().fit_transform(entries[['year']].fillna(entries['year'].mean()))
+        feature_matrices.append(year_scaled)
+        
+        # Specialization features
+        mlb = MultiLabelBinarizer()
+        spec_matrix = mlb.fit_transform(entries['original specialization'])
+        feature_matrices.append(spec_matrix)
+        
+        # Affiliation features
+        mlb = MultiLabelBinarizer()
+        aff_matrix = mlb.fit_transform(entries['affiliation'])
+        feature_matrices.append(aff_matrix)
+        
+        return np.hstack(feature_matrices)
+
+    def find_potential_duplicates(self, similarity_threshold=0.8):
+        """
+        Find potential duplicate records in the dataset
+        
+        Parameters:
+        - similarity_threshold: Threshold for considering two records as potential duplicates (0-1)
+        """
+        # Prepare features for all records
+        X = self.prepare_features(self.df)
+        
+        # Calculate pairwise similarities
+        similarities = cosine_similarity(X)
+        
+        # Find pairs above threshold
+        potential_duplicates = []
+        for i in range(len(self.df)):
+            for j in range(i + 1, len(self.df)):
+                similarity = similarities[i, j]
+                if similarity > similarity_threshold:
+                    record1 = self.df.iloc[i]
+                    record2 = self.df.iloc[j]
+                    
+                    # Calculate name similarity
+                    name1 = f"{record1['first_name']} {record1['last_name']}".lower()
+                    name2 = f"{record2['first_name']} {record2['last_name']}".lower()
+                    
+                    # Store the pair and their details
+                    duplicate_info = {
+                        'similarity': similarity,
+                        'record1': {
+                            'name': f"{record1['first_name']} {record1['last_name']}",
+                            'year': int(record1['year']),
+                            'specialization': record1['original specialization'],
+                            'affiliation': record1['affiliation']
+                        },
+                        'record2': {
+                            'name': f"{record2['first_name']} {record2['last_name']}",
+                            'year': int(record2['year']),
+                            'specialization': record2['original specialization'],
+                            'affiliation': record2['affiliation']
+                        }
+                    }
+                    potential_duplicates.append(duplicate_info)
+        
+        # Sort by similarity score
+        potential_duplicates.sort(key=lambda x: x['similarity'], reverse=True)
+        
+        # Print findings
+        if not potential_duplicates:
+            print("No potential duplicate records found.")
+            return
+        
+        print(f"\nFound {len(potential_duplicates)} potential duplicate pairs:")
+        for i, dup in enumerate(potential_duplicates, 1):
+            print(f"\nPotential Match {i} (similarity: {dup['similarity']:.3f}):")
+            print("Record 1:")
+            print(f"  Name: {dup['record1']['name']}")
+            print(f"  Year: {dup['record1']['year']}")
+            print(f"  Specialization: {', '.join(dup['record1']['specialization'][:2])}")
+            print(f"  Affiliation: {', '.join(dup['record1']['affiliation'][:2])}")
+            print("Record 2:")
+            print(f"  Name: {dup['record2']['name']}")
+            print(f"  Year: {dup['record2']['year']}")
+            print(f"  Specialization: {', '.join(dup['record2']['specialization'][:2])}")
+            print(f"  Affiliation: {', '.join(dup['record2']['affiliation'][:2])}")
+
 # Example usage
 if __name__ == "__main__":
-    # General clustering analysis
-    analyzer = PhysicianScientistAnalyzer()
     
     # Example: Cluster by year and specialization
-    feature_types = ['year', 'specialization']
-    n_clusters = 6
-    analyzer.cluster_and_visualize(feature_types, n_clusters)
-    
-    # Name disambiguation analysis
-    disambiguator = NameDisambiguator()
-    
+    # analyzer = PhysicianScientistAnalyzer()
+    # feature_types = ['year', 'specialization']
+    # n_clusters = 6
+    # analyzer.cluster_and_visualize(feature_types, n_clusters)
+
     # Example: Search for potential matches
+    # disambiguator = NameDisambiguator()
     # disambiguator.find_potential_matches("Smith", field='full')  # Search in both names
     # disambiguator.find_potential_matches("John", field='first_name')  # Search first name only
     # disambiguator.find_potential_matches("Smith", field='last_name')  # Search last name only
+    
+    finder = DuplicateRecordFinder()
+    finder.find_potential_duplicates(similarity_threshold=0.8)  # Adjust threshold as needed
     
