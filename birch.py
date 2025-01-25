@@ -80,44 +80,52 @@ class birch:
             raise ValueError("No features selected")
     
     def cluster_and_plot(self, feature_types, n_clusters):
-        # Reduce dimensions for visualization
+        # 1. Prepare features
         X = self.prepare_features(feature_types)
-        pca = PCA(n_components=2)
-        X_scaled = pca.fit_transform(X)
-
-
+        
+        # 2. Scale features
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        
+        # 3. Perform clustering on full-dimensional data
         birch_model = Birch(threshold=0.1, n_clusters=n_clusters)
         birch_model.fit(X_scaled) 
+        labels = birch_model.labels_
+        
+        # 4. Reduce dimensions for visualization only
+        pca = PCA(n_components=2)
+        X_pca = pca.fit_transform(X_scaled)
+        
+        # Calculate centroids in PCA space
+        centroids_pca = np.zeros((n_clusters, 2))
+        for k in range(n_clusters):
+            mask = labels == k
+            centroids_pca[k] = X_pca[mask].mean(axis=0)
 
-        labels = birch_model.labels_  # Cluster labels for each point
-        centroids = birch_model.subcluster_centers_  # Subcluster centers if n_clusters=None
-        #n_clusters = len(np.unique(labels))  # Number of unique clusters
-        print(f'Number of clusters: {n_clusters}')
-
-        # If data is 2D, plot the clusters
+        # Plot results
         fig, ax = plt.subplots(figsize=(8, 6))
 
         # Plot each cluster
-        colors_ = plt.cm.get_cmap('tab10', n_clusters)  # Set up a colormap with as many colors as clusters
+        colors_ = plt.cm.get_cmap('tab10', n_clusters)
         for k in range(n_clusters):
             mask = labels == k
-            ax.scatter(X_scaled[mask, 0], X_scaled[mask, 1], label=f'Cluster {k}', color=colors_(k), alpha=0.5)
+            ax.scatter(X_pca[mask, 0], X_pca[mask, 1], 
+                      label=f'Cluster {k}', color=colors_(k), alpha=0.5)
 
-        # Plot the centroids (if available)
-        if birch_model.n_clusters is not None:
-            for centroid in centroids:
-                ax.scatter(centroid[0], centroid[1], marker='x', s=100, c='black', label="Centroid")
+        # Plot the centroids
+        for centroid in centroids_pca:
+            ax.scatter(centroid[0], centroid[1], 
+                      marker='x', s=100, c='black', label="Centroid")
 
-        # Calculate variance explained by each component
-            var_explained = pca.explained_variance_ratio_ * 100
+        # Calculate variance explained
+        var_explained = pca.explained_variance_ratio_ * 100
                 
-        #ax.set_title('BIRCH Clustering')
         plt.title(f'Physician Scientists BIRCH Clustering by {", ".join(feature_types)}\n{n_clusters} Clusters', 
-                    fontsize=12, pad=20)
+                 fontsize=12, pad=20)
         plt.xlabel(f'First Principal Component\n({var_explained[0]:.1f}% variance explained)', 
-                    fontsize=10)
+                  fontsize=10)
         plt.ylabel(f'Second Principal Component\n({var_explained[1]:.1f}% variance explained)', 
-                    fontsize=10)
+                  fontsize=10)
 
         ax.legend()
         plt.show()
