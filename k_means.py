@@ -8,7 +8,7 @@ from sklearn.metrics import silhouette_score
 from sklearn.metrics.pairwise import cosine_similarity
 
 class PhysicianScientistAnalyzer:
-    def __init__(self, csv_path='150physicianscientists.csv'):
+    def __init__(self, csv_path='765physicianscientists.csv'):
         self.df = pd.read_csv(csv_path)
         # Convert string lists to actual lists
         list_columns = ['original specialization', 'affiliation', 'email_affiliation', 
@@ -135,7 +135,7 @@ class PhysicianScientistAnalyzer:
                 print("Top affiliations:", ', '.join(f"{aff} ({count})" for aff, count in common_affs))
 
 class NameDisambiguator:
-    def __init__(self, csv_path='150physicianscientists.csv'):
+    def __init__(self, csv_path='765physicianscientists.csv'):
         self.df = pd.read_csv(csv_path)
         # Convert string lists to actual lists
         list_columns = ['original specialization', 'affiliation', 'email_affiliation', 
@@ -149,8 +149,24 @@ class NameDisambiguator:
         """
         feature_matrices = []
         
-        # Year feature
-        year_scaled = StandardScaler().fit_transform(entries[['year']].fillna(entries['year'].mean()))
+        # Clean and process year data
+        def clean_year(x):
+            if pd.isna(x):
+                return np.nan
+            # Convert to string and clean up
+            x = str(x)
+            # Extract first occurrence of a year (4 digits)
+            import re
+            match = re.search(r'(\d{4})', x)
+            if match:
+                return float(match.group(1))
+            return np.nan
+        
+        # Clean year data and convert to numeric
+        year_data = entries['year'].apply(clean_year)
+        year_mean = year_data.mean()
+        year_cleaned = year_data.fillna(year_mean)
+        year_scaled = StandardScaler().fit_transform(year_cleaned.values.reshape(-1, 1))
         feature_matrices.append(year_scaled)
         
         # Specialization features
@@ -306,20 +322,47 @@ class NameDisambiguator:
                 print(f"Email: {entry['email']}")
 
 class DuplicateRecordFinder:
-    def __init__(self, csv_path='150physicianscientists.csv'):
+    def __init__(self, csv_path='765physicianscientists.csv'):
         self.df = pd.read_csv(csv_path)
         # Convert string lists to actual lists
         list_columns = ['original specialization', 'affiliation', 'email_affiliation', 
                        'umbrella_aff', 'related_aff', 'umbrella_spec', 'related_spec']
+        
         for col in list_columns:
-            self.df[col] = self.df[col].apply(lambda x: eval(x) if isinstance(x, str) else [])
+            if col in self.df.columns:
+                self.df[col] = self.df[col].apply(lambda x: 
+                    # If it's already a list
+                    [s.lower() for s in x] if isinstance(x, list)
+                    # If it's a string that looks like a Python list
+                    else [s.lower() for s in eval(x)] if isinstance(x, str) and x.startswith('[')
+                    # If it's a plain string, make it a single-item list
+                    else [str(x).lower()] if pd.notna(x)
+                    # If it's None/NaN
+                    else []
+                )
 
     def prepare_features(self, entries):
         """Prepare features for similarity comparison"""
         feature_matrices = []
         
-        # Year feature (normalized)
-        year_scaled = StandardScaler().fit_transform(entries[['year']].fillna(entries['year'].mean()))
+        # Clean and process year data
+        def clean_year(x):
+            if pd.isna(x):
+                return np.nan
+            # Convert to string and clean up
+            x = str(x)
+            # Extract first occurrence of a year (4 digits)
+            import re
+            match = re.search(r'(\d{4})', x)
+            if match:
+                return float(match.group(1))
+            return np.nan
+        
+        # Clean year data and convert to numeric
+        year_data = entries['year'].apply(clean_year)
+        year_mean = year_data.mean()
+        year_cleaned = year_data.fillna(year_mean)
+        year_scaled = StandardScaler().fit_transform(year_cleaned.values.reshape(-1, 1))
         feature_matrices.append(year_scaled)
         
         # Specialization features
@@ -360,18 +403,26 @@ class DuplicateRecordFinder:
                     name1 = f"{record1['first_name']} {record1['last_name']}".lower()
                     name2 = f"{record2['first_name']} {record2['last_name']}".lower()
                     
+                    # Handle year conversion safely
+                    def safe_year_convert(year_val):
+                        try:
+                            # First convert to float, then to int
+                            return int(float(str(year_val)))
+                        except (ValueError, TypeError):
+                            return None
+                    
                     # Store the pair and their details
                     duplicate_info = {
                         'similarity': similarity,
                         'record1': {
                             'name': f"{record1['first_name']} {record1['last_name']}",
-                            'year': int(record1['year']),
+                            'year': safe_year_convert(record1['year']),
                             'specialization': record1['original specialization'],
                             'affiliation': record1['affiliation']
                         },
                         'record2': {
                             'name': f"{record2['first_name']} {record2['last_name']}",
-                            'year': int(record2['year']),
+                            'year': safe_year_convert(record2['year']),
                             'specialization': record2['original specialization'],
                             'affiliation': record2['affiliation']
                         }
@@ -391,12 +442,12 @@ class DuplicateRecordFinder:
             print(f"\nPotential Match {i} (similarity: {dup['similarity']:.3f}):")
             print("Record 1:")
             print(f"  Name: {dup['record1']['name']}")
-            print(f"  Year: {dup['record1']['year']}")
+            print(f"  Year: {dup['record1']['year'] if dup['record1']['year'] is not None else 'Unknown'}")
             print(f"  Specialization: {', '.join(dup['record1']['specialization'][:2])}")
             print(f"  Affiliation: {', '.join(dup['record1']['affiliation'][:2])}")
             print("Record 2:")
             print(f"  Name: {dup['record2']['name']}")
-            print(f"  Year: {dup['record2']['year']}")
+            print(f"  Year: {dup['record2']['year'] if dup['record2']['year'] is not None else 'Unknown'}")
             print(f"  Specialization: {', '.join(dup['record2']['specialization'][:2])}")
             print(f"  Affiliation: {', '.join(dup['record2']['affiliation'][:2])}")
 
